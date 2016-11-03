@@ -2,11 +2,18 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"        
         xmlns:local="clr-namespace:HighlightableTextblock"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBox x:Name="filter" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBox x:Name="full" Text="{Binding Path=FullText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1"/>
+        <local:HighlightableTextBlock Grid.Row="2" Text="{Binding Text, ElementName=full}" HighlightText="{Binding Text, ElementName=filter}"/>
     </Grid>
 </Window>
