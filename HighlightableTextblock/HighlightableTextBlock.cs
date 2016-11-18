@@ -10,19 +10,49 @@ namespace HighlightableTextBlock
 {
     public class HighlightableTextBlock
     {
-        private static bool GetIsHighlighting(DependencyObject obj)
+        public static Brush GetHighlightTextBrush(DependencyObject obj)
         {
-            return (bool)obj.GetValue(IsHighlightingProperty);
+            return (Brush)obj.GetValue(HighlightTextBrushProperty);
         }
 
-        private static void SetIsHighlighting(DependencyObject obj, bool value)
+        public static void SetHighlightTextBrush(DependencyObject obj, Brush value)
         {
-            obj.SetValue(IsHighlightingProperty, value);
+            obj.SetValue(HighlightTextBrushProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for HighlightTextBrush.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty HighlightTextBrushProperty =
+            DependencyProperty.RegisterAttached("HighlightTextBrush", typeof(Brush), typeof(HighlightableTextBlock), new PropertyMetadata(SystemColors.HighlightTextBrush));
+        
+
+        public static Brush GetHighlightBrush(DependencyObject obj)
+        {
+            return (Brush)obj.GetValue(HighlightBrushProperty);
+        }
+
+        public static void SetHighlightBrush(DependencyObject obj, Brush value)
+        {
+            obj.SetValue(HighlightBrushProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for HighlightBrush.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty HighlightBrushProperty =
+            DependencyProperty.RegisterAttached("HighlightBrush", typeof(Brush), typeof(HighlightableTextBlock), new PropertyMetadata(SystemColors.HighlightBrush));
+
+
+        private static bool GetIsBusy(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(IsBusyProperty);
+        }
+
+        private static void SetIsBusy(DependencyObject obj, bool value)
+        {
+            obj.SetValue(IsBusyProperty, value);
         }
 
         // Using a DependencyProperty as the backing store for IsHighlighting.  This enables animation, styling, binding, etc...
-        private static readonly DependencyProperty IsHighlightingProperty =
-            DependencyProperty.RegisterAttached("IsHighlighting", typeof(bool), typeof(HighlightableTextBlock), new PropertyMetadata(false));
+        private static readonly DependencyProperty IsBusyProperty =
+            DependencyProperty.RegisterAttached("IsBusy", typeof(bool), typeof(HighlightableTextBlock), new PropertyMetadata(false));
 
 
         public static string GetHightlightText(DependencyObject obj)
@@ -57,7 +87,7 @@ namespace HighlightableTextBlock
                     textProperty.RemoveValueChanged(textblock, OnTextChanged);
                 }
 
-                HighlightParts(textblock, highlightText);
+                Highlight(textblock, highlightText);
             }
         }
 
@@ -66,33 +96,36 @@ namespace HighlightableTextBlock
             var textblock = sender as DependencyObject;
 
             if (textblock != null &&
-                !GetIsHighlighting(textblock))
+                !GetIsBusy(textblock))
             {
-                HighlightParts(sender as TextBlock, GetHightlightText(textblock));
+                Highlight(sender as TextBlock, GetHightlightText(textblock));
             }
         }
 
-        private static void HighlightParts(TextBlock textblock, string toHighlight)
+        private static void Highlight(TextBlock textblock, string toHighlight)
         {
             if (textblock == null) return;
 
             string text = textblock.Text;
 
-            SetIsHighlighting(textblock, true);
-
             if (!String.IsNullOrEmpty(text))
             {
+                SetIsBusy(textblock, true);
+
                 if (!String.IsNullOrEmpty(toHighlight))
                 {
                     var matches = Regex.Split(text, String.Format("({0})", toHighlight), RegexOptions.IgnoreCase);
 
                     textblock.Inlines.Clear();
 
+                    var highlightBrush = GetHighlightBrush(textblock);
+                    var highlightTextBrush = GetHighlightTextBrush(textblock);
+
                     foreach (var subString in matches)
                     {
                         if (String.Compare(subString, toHighlight, true) == 0)
                         {
-                            textblock.Inlines.Add(new Span(new Run(subString)) { Background = SystemColors.HighlightBrush, Foreground = SystemColors.HighlightTextBrush });
+                            textblock.Inlines.Add(new Span(new Run(subString)) { Background = highlightBrush, Foreground = highlightTextBrush });
                         }
                         else
                         {
@@ -105,108 +138,9 @@ namespace HighlightableTextBlock
                     textblock.Inlines.Clear();
                     textblock.Text = text;
                 }
-            }
 
-            SetIsHighlighting(textblock, false);
+                SetIsBusy(textblock, false);
+            }            
         }
-    }
-
-    public class HighlightableTextBlock2 : TextBlock
-    {
-        #region Fields
-
-        // Using a DependencyProperty as the backing store for HighlightText.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty HighlightTextProperty =
-            DependencyProperty.Register("HighlightText", typeof(string), typeof(HighlightableTextBlock2), new PropertyMetadata(OnHighlightTextChanged));
-
-        // Using a DependencyProperty as the backing store for HighlightBrush.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty HighlightBrushProperty =
-            DependencyProperty.Register("HighlightBrush", typeof(Brush), typeof(HighlightableTextBlock2), new PropertyMetadata(SystemColors.HighlightBrush));
-
-        // Using a DependencyProperty as the backing store for HighlightTextBrush.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty HighlightTextBrushProperty =
-            DependencyProperty.Register("HighlightTextBrush", typeof(Brush), typeof(HighlightableTextBlock2), new PropertyMetadata(SystemColors.HighlightTextBrush));
-
-        #endregion
-
-        #region Constructors
-
-        public HighlightableTextBlock2()
-        {
-            var textProperty = DependencyPropertyDescriptor.FromProperty(HighlightableTextBlock2.TextProperty, typeof(HighlightableTextBlock2));
-
-            textProperty.AddValueChanged(this, (sender, e) =>
-            {
-                HighlightParts(sender as TextBlock, HighlightText);
-            });
-        }
-
-        #endregion 
-
-        public Brush HighlightBrush
-        {
-            get { return (Brush)GetValue(HighlightBrushProperty); }
-            set { SetValue(HighlightBrushProperty, value); }
-        }
-
-        public Brush HighlightTextBrush
-        {
-            get { return (Brush)GetValue(HighlightTextBrushProperty); }
-            set { SetValue(HighlightTextBrushProperty, value); }
-        }
-
-        public string HighlightText
-        {
-            get { return (string)GetValue(HighlightTextProperty); }
-            set { SetValue(HighlightTextProperty, value); }
-        }
-
-        private static void OnHighlightTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var textblock = d as TextBlock;
-
-            if (textblock != null)
-            {
-                var text = textblock.Text;
-                var highlightText = e.NewValue as string;
-
-                HighlightParts(textblock, highlightText);
-            }
-        }
-
-        private static void HighlightParts(TextBlock textblock, string toHighlight)
-        {
-            if (textblock == null) return;
-
-            string text = textblock.Text;
-
-            if (!String.IsNullOrEmpty(text))
-            {
-                   
-                if (!String.IsNullOrEmpty(toHighlight))
-                {
-                    var matches = Regex.Split(text, String.Format("({0})", toHighlight), RegexOptions.IgnoreCase);
-
-                    textblock.Inlines.Clear();
-
-                    foreach (var subString in matches)
-                    {
-                        if (String.Compare(subString, toHighlight, true) == 0)
-                        {
-                            textblock.Inlines.Add(new Span(new Run(toHighlight)) { Background = SystemColors.HighlightBrush, Foreground = SystemColors.HighlightTextBrush });
-                        }
-                        else
-                        {
-                            textblock.Inlines.Add(subString);
-                        }
-                    }
-                }
-                else
-                {
-                    textblock.Inlines.Clear();
-                    textblock.Text = text;
-                }
-            }
-        }
-    }
+    }    
 }
