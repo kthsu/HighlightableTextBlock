@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Prism.Mvvm;
 
-namespace HighlightableTextblock
+namespace HighlightSample
 {
     public class ViewModel : BindableBase
     {

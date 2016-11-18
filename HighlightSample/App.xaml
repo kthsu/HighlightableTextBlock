@@ -1,7 +1,7 @@
-﻿<Application x:Class="HighlightableTextblock.App"
+﻿<Application x:Class="HighlightSample.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:HighlightableTextblock"
+             xmlns:local="clr-namespace:HighlightSample"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          
