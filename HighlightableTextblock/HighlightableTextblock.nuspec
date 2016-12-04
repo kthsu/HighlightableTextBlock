@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>HighlightableTextBlock</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Kevin Hsu</authors>
+    <owners>Kevin Hsu</owners>
+    <licenseUrl>https://github.com/kthsu/HighlightableTextblock/blob/master/License.md</licenseUrl>
+    <projectUrl>https://github.com/kthsu/HighlightableTextblock</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Awesome highlighting add-on for WPF TextBlock</description>
+    <releaseNotes>Initial Release</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>wpf highlight textblock text xaml</tags>
+  </metadata>
+</package>
