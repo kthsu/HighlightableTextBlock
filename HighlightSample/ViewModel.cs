@@ -9,13 +9,13 @@ namespace HighlightSample
 {
     public class ViewModel : BindableBase
     {
-        private string filterText;
+        private string filter;
         private string fullText;
 
-        public string FilterText
+        public string Filter
         {
-            get { return filterText; }
-            set { SetProperty(ref this.filterText, value); }
+            get { return filter; }
+            set { SetProperty(ref this.filter, value); }
         }        
 
         public string FullText

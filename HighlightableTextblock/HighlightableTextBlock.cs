@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +9,8 @@ namespace HighlightableTextBlock
 {
     public class HighlightableTextBlock
     {
+        #region HighlightTextBrush
+
         public static Brush GetHighlightTextBrush(DependencyObject obj)
         {
             return (Brush)obj.GetValue(HighlightTextBrushProperty);
@@ -23,7 +24,10 @@ namespace HighlightableTextBlock
         // Using a DependencyProperty as the backing store for HighlightTextBrush.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty HighlightTextBrushProperty =
             DependencyProperty.RegisterAttached("HighlightTextBrush", typeof(Brush), typeof(HighlightableTextBlock), new PropertyMetadata(SystemColors.HighlightTextBrush));
-        
+
+        #endregion
+
+        #region HighlightBrush
 
         public static Brush GetHighlightBrush(DependencyObject obj)
         {
@@ -39,21 +43,9 @@ namespace HighlightableTextBlock
         public static readonly DependencyProperty HighlightBrushProperty =
             DependencyProperty.RegisterAttached("HighlightBrush", typeof(Brush), typeof(HighlightableTextBlock), new PropertyMetadata(SystemColors.HighlightBrush));
 
+        #endregion
 
-        private static bool GetIsBusy(DependencyObject obj)
-        {
-            return (bool)obj.GetValue(IsBusyProperty);
-        }
-
-        private static void SetIsBusy(DependencyObject obj, bool value)
-        {
-            obj.SetValue(IsBusyProperty, value);
-        }
-
-        // Using a DependencyProperty as the backing store for IsHighlighting.  This enables animation, styling, binding, etc...
-        private static readonly DependencyProperty IsBusyProperty =
-            DependencyProperty.RegisterAttached("IsBusy", typeof(bool), typeof(HighlightableTextBlock), new PropertyMetadata(false));
-
+        #region HighlightText
 
         public static string GetHightlightText(DependencyObject obj)
         {
@@ -71,36 +63,42 @@ namespace HighlightableTextBlock
 
         private static void OnHighlightTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            Highlight(d as TextBlock, e.NewValue as string);
+        }
+
+        #endregion
+
+        #region InternalText
+
+        protected static string GetInternalText(DependencyObject obj)
+        {
+            return (string)obj.GetValue(InternalTextProperty);
+        }
+
+        protected static void SetInternalText(DependencyObject obj, string value)
+        {
+            obj.SetValue(InternalTextProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for InternalText.  This enables animation, styling, binding, etc...
+        protected static readonly DependencyProperty InternalTextProperty =
+            DependencyProperty.RegisterAttached("InternalText", typeof(string),
+                typeof(HighlightableTextBlock), new PropertyMetadata(string.Empty, OnInternalTextChanged));
+
+        private static void OnInternalTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             var textblock = d as TextBlock;
 
             if (textblock != null)
             {
-                var highlightText = e.NewValue as string;
-                var textProperty = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
-
-                if (!String.IsNullOrEmpty(highlightText))
-                {
-                    textProperty.AddValueChanged(textblock, OnTextChanged);
-                }
-                else
-                {
-                    textProperty.RemoveValueChanged(textblock, OnTextChanged);
-                }
-
-                Highlight(textblock, highlightText);
+                textblock.Text = e.NewValue as string;
+                Highlight(textblock, GetHightlightText(textblock));
             }
         }
 
-        private static void OnTextChanged(object sender, EventArgs e)
-        {
-            var textblock = sender as DependencyObject;
+        #endregion
 
-            if (textblock != null &&
-                !GetIsBusy(textblock))
-            {
-                Highlight(sender as TextBlock, GetHightlightText(textblock));
-            }
-        }
+        #region Methods
 
         private static void Highlight(TextBlock textblock, string toHighlight)
         {
@@ -108,15 +106,23 @@ namespace HighlightableTextBlock
 
             string text = textblock.Text;
 
-            if (!String.IsNullOrEmpty(text))
+            if (textblock.GetBindingExpression(HighlightableTextBlock.InternalTextProperty) == null)
             {
-                SetIsBusy(textblock, true);
+                var textBinding = textblock.GetBindingExpression(TextBlock.TextProperty);
 
+                if (textBinding != null)
+                {
+                    textblock.SetBinding(HighlightableTextBlock.InternalTextProperty, textBinding.ParentBindingBase);
+                }
+            }
+
+            if (!String.IsNullOrEmpty(text))
+            {                      
                 if (!String.IsNullOrEmpty(toHighlight))
                 {
-                    var matches = Regex.Split(text, String.Format("({0})", toHighlight), RegexOptions.IgnoreCase);
+                    var matches = Regex.Split(text, String.Format("({0})", Regex.Escape(toHighlight)), RegexOptions.IgnoreCase);
 
-                    textblock.Inlines.Clear();
+                    textblock.Inlines.Clear();                  
 
                     var highlightBrush = GetHighlightBrush(textblock);
                     var highlightTextBrush = GetHighlightTextBrush(textblock);
@@ -125,7 +131,12 @@ namespace HighlightableTextBlock
                     {
                         if (String.Compare(subString, toHighlight, true) == 0)
                         {
-                            textblock.Inlines.Add(new Span(new Run(subString)) { Background = highlightBrush, Foreground = highlightTextBrush });
+                            textblock.Inlines.Add(new Span(
+                                new Run(subString))
+                            {
+                                Background = highlightBrush,
+                                Foreground = highlightTextBrush
+                            });
                         }
                         else
                         {
@@ -136,11 +147,11 @@ namespace HighlightableTextBlock
                 else
                 {
                     textblock.Inlines.Clear();
-                    textblock.Text = text;
-                }
-
-                SetIsBusy(textblock, false);
+                    textblock.SetCurrentValue(TextBlock.TextProperty, text);
+                }                
             }            
         }
+
+        #endregion
     }    
 }
