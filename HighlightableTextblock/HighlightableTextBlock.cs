@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -59,7 +60,7 @@ namespace HighlightableTextBlock
 
         // Using a DependencyProperty as the backing store for HightlightText.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty HightlightTextProperty =
-            DependencyProperty.RegisterAttached("HightlightText", typeof(string), typeof(HighlightableTextBlock), new PropertyMetadata(string.Empty,OnHighlightTextChanged));
+            DependencyProperty.RegisterAttached("HightlightText", typeof(string), typeof(HighlightableTextBlock), new PropertyMetadata(string.Empty, OnHighlightTextChanged));
 
         private static void OnHighlightTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -98,6 +99,24 @@ namespace HighlightableTextBlock
 
         #endregion
 
+        #region  IsBusy 
+
+        private static bool GetIsBusy(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(IsBusyProperty);
+        }
+
+        private static void SetIsBusy(DependencyObject obj, bool value)
+        {
+            obj.SetValue(IsBusyProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for IsBusy.  This enables animation, styling, binding, etc...
+        private static readonly DependencyProperty IsBusyProperty =
+            DependencyProperty.RegisterAttached("IsBusy", typeof(bool), typeof(HighlightableTextBlock), new PropertyMetadata(false));
+
+        #endregion
+
         #region Methods
 
         private static void Highlight(TextBlock textblock, string toHighlight)
@@ -113,16 +132,28 @@ namespace HighlightableTextBlock
                 if (textBinding != null)
                 {
                     textblock.SetBinding(HighlightableTextBlock.InternalTextProperty, textBinding.ParentBindingBase);
+
+                    var propertyDescriptor = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
+
+                    propertyDescriptor.RemoveValueChanged(textblock, OnTextChanged);
+                }
+                else
+                {
+                    var propertyDescriptor = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
+
+                    propertyDescriptor.AddValueChanged(textblock, OnTextChanged);
                 }
             }
 
             if (!String.IsNullOrEmpty(text))
-            {                      
+            {
+                SetIsBusy(textblock, true);
+
                 if (!String.IsNullOrEmpty(toHighlight))
                 {
                     var matches = Regex.Split(text, String.Format("({0})", Regex.Escape(toHighlight)), RegexOptions.IgnoreCase);
 
-                    textblock.Inlines.Clear();                  
+                    textblock.Inlines.Clear();
 
                     var highlightBrush = GetHighlightBrush(textblock);
                     var highlightTextBrush = GetHighlightTextBrush(textblock);
@@ -148,10 +179,23 @@ namespace HighlightableTextBlock
                 {
                     textblock.Inlines.Clear();
                     textblock.SetCurrentValue(TextBlock.TextProperty, text);
-                }                
-            }            
+                }
+
+                SetIsBusy(textblock, false);
+            }
+        }
+
+        private static void OnTextChanged(object sender, EventArgs e)
+        {
+            var textBlock = sender as TextBlock;
+
+            if (textBlock != null &&
+                !GetIsBusy(textBlock))
+            {
+                Highlight(textBlock, GetHightlightText(textBlock));
+            }
         }
 
         #endregion
-    }    
+    }
 }

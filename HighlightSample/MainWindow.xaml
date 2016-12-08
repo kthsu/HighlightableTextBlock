@@ -13,10 +13,10 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <TextBox x:Name="filter" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBox x:Name="filter" Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"/>
         <TextBox x:Name="full" Text="{Binding Path=FullText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1"/>
-        <TextBlock Grid.Row="2" Text="{Binding Path=Text, ElementName=full}" 
-                   controls:HighlightableTextBlock.HightlightText="{Binding Text, ElementName=filter}" 
+        <TextBlock Grid.Row="2" Text="{Binding Path=Text, ElementName=full}"
+                   controls:HighlightableTextBlock.HightlightText="{Binding Filter}" 
                    controls:HighlightableTextBlock.HighlightBrush="Yellow" controls:HighlightableTextBlock.HighlightTextBrush="Red"/>
     </Grid>
 </Window>
