@@ -10,6 +10,60 @@ namespace HighlightableTextBlock
 {
     public class HighlightableTextBlock
     {
+        #region Bold
+
+        public static bool GetBold(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(BoldProperty);
+        }
+
+        public static void SetBold(DependencyObject obj, bool value)
+        {
+            obj.SetValue(BoldProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for Bold.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty BoldProperty =
+            DependencyProperty.RegisterAttached("Bold", typeof(bool), typeof(HighlightableTextBlock), new PropertyMetadata(false, Refresh));
+
+        #endregion
+
+        #region Italic
+
+        public static bool GetItalic(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(ItalicProperty);
+        }
+
+        public static void SetItalic(DependencyObject obj, bool value)
+        {
+            obj.SetValue(ItalicProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for Italic.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ItalicProperty =
+            DependencyProperty.RegisterAttached("Italic", typeof(bool), typeof(HighlightableTextBlock), new PropertyMetadata(false, Refresh));
+
+        #endregion
+
+        #region Underline
+
+        public static bool GetUnderline(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(UnderlineProperty);
+        }
+
+        public static void SetUnderline(DependencyObject obj, bool value)
+        {
+            obj.SetValue(UnderlineProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for Underline.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty UnderlineProperty =
+            DependencyProperty.RegisterAttached("Underline", typeof(bool), typeof(HighlightableTextBlock), new PropertyMetadata(false, Refresh));
+
+        #endregion
+
         #region HighlightTextBrush
 
         public static Brush GetHighlightTextBrush(DependencyObject obj)
@@ -24,7 +78,7 @@ namespace HighlightableTextBlock
 
         // Using a DependencyProperty as the backing store for HighlightTextBrush.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty HighlightTextBrushProperty =
-            DependencyProperty.RegisterAttached("HighlightTextBrush", typeof(Brush), typeof(HighlightableTextBlock), new PropertyMetadata(SystemColors.HighlightTextBrush));
+            DependencyProperty.RegisterAttached("HighlightTextBrush", typeof(Brush), typeof(HighlightableTextBlock), new PropertyMetadata(SystemColors.HighlightTextBrush, Refresh));
 
         #endregion
 
@@ -42,7 +96,7 @@ namespace HighlightableTextBlock
 
         // Using a DependencyProperty as the backing store for HighlightBrush.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty HighlightBrushProperty =
-            DependencyProperty.RegisterAttached("HighlightBrush", typeof(Brush), typeof(HighlightableTextBlock), new PropertyMetadata(SystemColors.HighlightBrush));
+            DependencyProperty.RegisterAttached("HighlightBrush", typeof(Brush), typeof(HighlightableTextBlock), new PropertyMetadata(SystemColors.HighlightBrush, Refresh));
 
         #endregion
 
@@ -60,12 +114,7 @@ namespace HighlightableTextBlock
 
         // Using a DependencyProperty as the backing store for HightlightText.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty HightlightTextProperty =
-            DependencyProperty.RegisterAttached("HightlightText", typeof(string), typeof(HighlightableTextBlock), new PropertyMetadata(string.Empty, OnHighlightTextChanged));
-
-        private static void OnHighlightTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            Highlight(d as TextBlock, e.NewValue as string);
-        }
+            DependencyProperty.RegisterAttached("HightlightText", typeof(string), typeof(HighlightableTextBlock), new PropertyMetadata(string.Empty, Refresh));
 
         #endregion
 
@@ -93,7 +142,7 @@ namespace HighlightableTextBlock
             if (textblock != null)
             {
                 textblock.Text = e.NewValue as string;
-                Highlight(textblock, GetHightlightText(textblock));
+                Highlight(textblock);
             }
         }
 
@@ -119,7 +168,12 @@ namespace HighlightableTextBlock
 
         #region Methods
 
-        private static void Highlight(TextBlock textblock, string toHighlight)
+        private static void Refresh(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            Highlight(d as TextBlock);
+        }
+
+        private static void Highlight(TextBlock textblock)
         {
             if (textblock == null) return;
 
@@ -149,6 +203,8 @@ namespace HighlightableTextBlock
             {
                 SetIsBusy(textblock, true);
 
+                var toHighlight = GetHightlightText(textblock);
+
                 if (!String.IsNullOrEmpty(toHighlight))
                 {
                     var matches = Regex.Split(text, String.Format("({0})", Regex.Escape(toHighlight)), RegexOptions.IgnoreCase);
@@ -162,12 +218,28 @@ namespace HighlightableTextBlock
                     {
                         if (String.Compare(subString, toHighlight, true) == 0)
                         {
-                            textblock.Inlines.Add(new Span(
-                                new Run(subString))
+                            var formattedText = new Run(subString)
                             {
                                 Background = highlightBrush,
-                                Foreground = highlightTextBrush
-                            });
+                                Foreground = highlightTextBrush,
+                            };
+
+                            if (GetBold(textblock))
+                            {
+                                formattedText.FontWeight = FontWeights.Bold;
+                            }
+
+                            if (GetItalic(textblock))
+                            {
+                                formattedText.FontStyle = FontStyles.Italic;
+                            }
+
+                            if (GetUnderline(textblock))
+                            {
+                                formattedText.TextDecorations.Add(TextDecorations.Underline);
+                            }
+
+                            textblock.Inlines.Add(formattedText);
                         }
                         else
                         {
@@ -192,7 +264,7 @@ namespace HighlightableTextBlock
             if (textBlock != null &&
                 !GetIsBusy(textBlock))
             {
-                Highlight(textBlock, GetHightlightText(textBlock));
+                Highlight(textBlock);
             }
         }
 
