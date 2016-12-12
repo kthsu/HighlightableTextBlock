@@ -13,8 +13,9 @@ xmlns:controls="clr-namespace:HighlightableTextBlock;assembly=HighlightableTextB
 controls:HighlightableTextBlock.HightlightText="{Binding SearchText}" 
 * Ta-da! Now you have highlightable TextBlocks in your application!
 * Customization
-** Highlight color - 
-** Highlight text color - 
-** Bold -
-** Italic -
-** Underline - 
+
+** Highlight color - controls:HighlightableTextBlock.HighlightBrush="Yellow" 
+** Highlight text color - controls:HighlightableTextBlock.HighlightTextBrush="Red"
+** Bold - controls:HighlightableTextBlock.Bold="True"
+** Italic - controls:HighlightableTextBlock.Italic="True"
+** Underline - controls:HighlightableTextBlock.Underline="True"
