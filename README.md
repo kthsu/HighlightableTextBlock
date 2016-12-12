@@ -1,7 +1,7 @@
 # HighlightableTextBlock - Highlighting add-on for WPF TextBlock
 
 ## Quick Start
-### XAML
+### Modifying the XAML file
 
 After installing HighlightableTextBlock:
 
