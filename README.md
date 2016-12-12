@@ -13,6 +13,7 @@ After installing HighlightableTextBlock:
 * Add this attribute:
 
   controls:HighlightableTextBlock.HightlightText="{Binding SearchText}" 
+  This will add highlighting using system default colors.
 * Ta-da! Now you have highlightable TextBlocks in your application!
 * Customization
 
