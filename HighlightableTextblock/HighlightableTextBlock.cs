@@ -196,6 +196,9 @@ namespace HighlightableTextBlock
                     var propertyDescriptor = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
 
                     propertyDescriptor.AddValueChanged(textblock, OnTextChanged);
+
+                    textblock.Unloaded -= Textblock_Unloaded;
+                    textblock.Unloaded += Textblock_Unloaded;
                 }
             }
 
@@ -255,6 +258,13 @@ namespace HighlightableTextBlock
 
                 SetIsBusy(textblock, false);
             }
+        }
+
+        private static void Textblock_Unloaded(object sender, RoutedEventArgs e)
+        {
+            var propertyDescriptor = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
+
+            propertyDescriptor.RemoveValueChanged(sender as TextBlock, OnTextChanged);
         }
 
         private static void OnTextChanged(object sender, EventArgs e)
