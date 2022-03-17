@@ -19,6 +19,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -27,12 +28,15 @@
         </Grid.ColumnDefinitions>
         <TextBlock Text="Input" />
         <TextBlock Grid.Row="1" Text="Search"/>
-        <TextBlock Grid.Row="2" Text="Output"/>
+        <TextBlock Grid.Row="2" Text="Ignore Case"/>
+        <TextBlock Grid.Row="3" Text="Output"/>
         <TextBox Grid.Column="1" x:Name="full" Text="{Binding Path=FullText, UpdateSourceTrigger=PropertyChanged}"/>
         <TextBox Grid.Row="1" Grid.Column="1" x:Name="filter" Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"/>
-        <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding Path=Text, ElementName=full}"
+        <CheckBox Grid.Row="2" Grid.Column="1" x:Name="ignoreCase"></CheckBox>
+        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Path=Text, ElementName=full}"
                    controls:HighlightableTextBlock.HightlightText="{Binding Filter}" controls:HighlightableTextBlock.Italic="True"
                    controls:HighlightableTextBlock.HighlightBrush="Yellow" controls:HighlightableTextBlock.HighlightTextBrush="Red"
-                   controls:HighlightableTextBlock.Bold="True"/>
+                   controls:HighlightableTextBlock.Bold="True"
+                   controls:HighlightableTextBlock.IgnoreCase="{Binding ElementName=ignoreCase, Path=IsChecked}"/>
     </Grid>
 </Window>

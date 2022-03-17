@@ -27,6 +27,24 @@ namespace HighlightableTextBlock
             DependencyProperty.RegisterAttached("Bold", typeof(bool), typeof(HighlightableTextBlock), new PropertyMetadata(false, Refresh));
 
         #endregion
+        
+        #region IgnoreCase
+
+        public static bool GetIgnoreCase(DependencyObject obj)
+        {
+            return (bool) obj.GetValue(IgnoreCaseProperty);
+        }
+
+        public static void SetIgnoreCase(DependencyObject obj, bool value)
+        {
+            obj.SetValue(IgnoreCaseProperty, value);
+        }
+
+        public static readonly DependencyProperty IgnoreCaseProperty = DependencyProperty
+            .RegisterAttached("IgnoreCase", typeof(bool), typeof(HighlightableTextBlock),
+                new PropertyMetadata(false, Refresh));
+        
+        #endregion
 
         #region Italic
 
@@ -210,7 +228,9 @@ namespace HighlightableTextBlock
 
                 if (!String.IsNullOrEmpty(toHighlight))
                 {
-                    var matches = Regex.Split(text, String.Format("({0})", Regex.Escape(toHighlight)), RegexOptions.IgnoreCase);
+                    var regexOptions = GetIgnoreCase(textblock) ? RegexOptions.IgnoreCase : RegexOptions.None;
+                    
+                    var matches = Regex.Split(text, String.Format("({0})", Regex.Escape(toHighlight)), regexOptions);
 
                     textblock.Inlines.Clear();
 
